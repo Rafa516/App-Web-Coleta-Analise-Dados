@@ -6,7 +6,7 @@ from pyxlsb import open_workbook as open_xlsb
 import io
 
 
-#FUNÇÃO PARA VERIFICAÇÃO DOS ARQUIVOS
+#FUNÇÃO PARA VERIFICAÇÃO DOS ARQUIVOS (CSV E XLS) -- LEITURA DOS DADOS
 def documentosLeitura(tipo):     
     arquivos = uploadArquivo(tipo)  
     
@@ -42,8 +42,63 @@ def documentosLeitura(tipo):
          st.download_button(label='📥 Download do arquivo xls',
                                 data=df_xlsx ,
                                 file_name= nomeArquivo+'.xlsx',
-                                key = downloadButtonKey )  
+                                key = downloadButtonKey )
+          
+
+#FUNÇÃO PARA VERIFICAÇÃO DOS ARQUIVOS (LINK GOOGLE DRIVE CSV) -- LEITURA DOS DADOS
+def documentoLink(url):
+    path = 'https://drive.google.com/uc?export=download&id='+url.split('/')[-2]
+    df = pd.read_csv(path)
       
+    options = st.multiselect(
+    'Escolha as colunas que deseja remover',
+    df.columns)
+    
+     #REMOVENDO AS COLUNAS SELECIONADAS
+    for col in options:
+         if col in options:
+            df = df.drop(columns=[col])
+    #DATAFRAME          
+    st.dataframe(df)  
+                
+    st.write('Quantidade de dados nulos')
+    nulos = df.isnull().sum()
+    st.write(nulos)
+         
+    st.subheader('Realizar Download do arquivo  atualizado') 
+    nomeArquivo = st.text_input('Novo nome do Arquivo')
+    df_xlsx = to_excel(df)       
+    st.download_button(label='📥 Download do arquivo xls',
+                                data=df_xlsx ,
+                                file_name= nomeArquivo+'.xlsx',
+                                 ) 
+
+
+#FUNÇÃO PARA VERIFICAÇÃO DOS ARQUIVOS (LINK GOOGLE DRIVE CSV) -- FORMATANDO AS COLUNAS CATEGORICAS    
+def documentoLinkColunasCategoricas(url):
+    path = 'https://drive.google.com/uc?export=download&id='+url.split('/')[-2]
+    df = pd.read_csv(path) 
+    
+    options = st.multiselect(
+    'Escolha as colunas que deseja remover',
+    df.columns)
+     #REMOVENDO AS COLUNAS SELECIONADAS
+    for col in options:
+        if col in options:
+            df = df.drop(columns=[col])
+                    
+          
+    #DATAFRAME             
+    st.dataframe(df)
+     #INFORMAÇÕES DAS COLUNAS
+    st.write('Informações das Colunas')        
+    buffer = io.StringIO()
+    df.info(buf=buffer)
+    s = buffer.getvalue()
+    st.text(s)
+    
+
+#FUNÇÃO PARA VERIFICAÇÃO DOS ARQUIVOS (CSV E XLS) -- FORMATANDO AS COLUNAS CATEGORICAS       
 def documentosColunastegoricas(tipo):     
     arquivos = uploadArquivo(tipo)
     
@@ -82,7 +137,8 @@ def documentosColunastegoricas(tipo):
 def uploadArquivo(tipo):
  arquivos = st.file_uploader('Faça upload do arquivo '+ tipo, accept_multiple_files=True,type = tipo) 
  return arquivos
-            
+
+        
 #FUNÇÃO PARA LEITURA DOS ARQUIVOS SELECIONADOS PELO TIPO
 def leitura(tipo,arquivo):
     if(tipo == 'xls'):
