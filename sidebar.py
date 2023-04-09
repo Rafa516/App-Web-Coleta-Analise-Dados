@@ -8,18 +8,20 @@ def itensSidebar():
     "Escolha uma opção para navegar",
     ("Leitura dos dados", "Formatando as colunas categoricas", "Train Test Split")   
 )
+    option = st.selectbox(
+    'Selecione o formato de arquivo que deseja realizar o upload', 
+    ('xls', 'csv',))    
     #LEITURA DOS DADOS
     if(select == 'Leitura dos dados'):
         st.subheader('Leitura dos dados')  
-        option = st.selectbox(
-        'Selecione o formato de arquivo que deseja realizar o upload',
-        ('xls', 'csv',))
+       
         #VERIFICAÇÕES COM ARQUIVOS XLS E CSV
-        fun.documentos(option)
+        fun.documentosLeitura(option)
         
     #FORMATANDO AS COLUNAS CATEGORICAS   
     if(select == 'Formatando as colunas categoricas'):
         st.subheader('Formatando as colunas categoricas') 
+        fun.documentosColunastegoricas(option)
     
     #TRAIN TEST SPLIT    
     if(select == 'Train Test Split'):

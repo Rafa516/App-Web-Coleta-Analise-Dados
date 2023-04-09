@@ -3,10 +3,12 @@ import streamlit as st
 import pandas as pd
 from io import BytesIO
 from pyxlsb import open_workbook as open_xlsb
+import io
+
 
 #FUNÇÃO PARA VERIFICAÇÃO DOS ARQUIVOS
-def documentos(tipo):     
-    arquivos = st.file_uploader('Faça upload do arquivo '+ tipo, accept_multiple_files=True,type = tipo)  
+def documentosLeitura(tipo):     
+    arquivos = uploadArquivo(tipo)  
     
     multiSelectKey = 0
     textInputKey = 50
@@ -27,8 +29,9 @@ def documentos(tipo):
          for col in options:
                 if col in options:
                     df = df.drop(columns=[col])
-                  
-         st.dataframe(df)         
+        #DATAFRAME          
+         st.dataframe(df)  
+                
          st.write('Quantidade de dados nulos')
          nulos = df.isnull().sum()
          st.write(nulos)
@@ -41,7 +44,44 @@ def documentos(tipo):
                                 file_name= nomeArquivo+'.xlsx',
                                 key = downloadButtonKey )  
       
+def documentosColunastegoricas(tipo):     
+    arquivos = uploadArquivo(tipo)
+    
+    multiSelectKey = 0
+    textInputKey = 50
+    downloadButtonKey = 100
+    
+    for arquivo in arquivos: 
+         multiSelectKey += 1
+         textInputKey +=1
+         downloadButtonKey +=1
+         df = leitura(tipo,arquivo)           
+         st.write('Verificações do arquivo',arquivo.name)
+         
+         options = st.multiselect(
+        'Escolha as colunas que deseja remover',
+         df.columns,key = multiSelectKey)
+         #REMOVENDO AS COLUNAS SELECIONADAS
+         for col in options:
+                if col in options:
+                    df = df.drop(columns=[col])
+                    
+          
+          #DATAFRAME             
+         st.dataframe(df)
+          #INFORMAÇÕES DAS COLUNAS
+         st.write('Informações das Colunas')        
+         buffer = io.StringIO()
+         df.info(buf=buffer)
+         s = buffer.getvalue()
+         st.text(s)
+             
+
         
+#FUNÇÃO PARA UPLOAD DE ARQUIVOS
+def uploadArquivo(tipo):
+ arquivos = st.file_uploader('Faça upload do arquivo '+ tipo, accept_multiple_files=True,type = tipo) 
+ return arquivos
             
 #FUNÇÃO PARA LEITURA DOS ARQUIVOS SELECIONADOS PELO TIPO
 def leitura(tipo,arquivo):
@@ -62,4 +102,5 @@ def to_excel(df):
     writer.save()
     processed_data = output.getvalue()
     return processed_data
+ 
  
